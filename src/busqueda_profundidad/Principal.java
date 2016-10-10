@@ -95,31 +95,64 @@ public class Principal extends JFrame{
 		int matrizInicial[][];
 		int matrizMeta[][];
 		Vector<int[][]> visitados = new Vector<int[][]>();
+		Stack<NodoArbol> pila = new Stack<NodoArbol>();
+		boolean terminado = false;
 		public void actionPerformed(ActionEvent e){
 			String comando = e.getActionCommand();
 			if(comando.equals("Buscar")){
 				bloquearCamposTexto();
+				visitados.clear();
+				pila.clear();
 				matrizInicial = new int[3][3];
 				matrizMeta = new int[3][3];
 				llenarMatrices(matrizInicial,matrizMeta);
 				arbol = new Arbol<int[][]>(matrizInicial);
-				visitados.addElement(matrizInicial);
+				visitados.add(matrizInicial);
+				System.out.println("Empieza a generar hijos");
 				generarHijos(arbol.getRaiz());
+				System.out.println("Termina de generar hijos");
+				if(terminado) 
+					consolaDer.append("\nSI SE ENCONTRÓ");
+				else
+					consolaDer.append("\nNO SE ENCONTRÓ");
 			}
 		}
 		public void generarHijos(NodoArbol<int[][]> nodo){
+			imprimir(nodo.getElemento());
 			if(nodo.getElemento()==null) return;
-			boolean terminado = false;
-			while(!terminado){
+			System.out.println("Apunto de entrar al while(true)");
+			while(true){
+				System.out.println("Entra al while");
 				if(nodo.getElemento()!=matrizMeta){
+					//Añade hijos de "nodo"
+					System.out.println("Empieza a obtener movimientos");
 					getMovimientos(nodo.getElemento());
-					generarHijos(nodo.getHijoI());
-					generarHijos(nodo.getHijoCI());
-					generarHijos(nodo.getHijoCD());
-					generarHijos(nodo.getHijoD());
+					System.out.println("Termina de obtener movimientos");
+					//Añade hermanos de nodo izquierdo a pila para futuro backtracking
+					if(nodo.getHijoI()!=null){
+						if(nodo.getHijoD().getElemento()!=null) pila.push(nodo.getHijoD());
+						if(nodo.getHijoCD().getElemento()!=null) pila.push(nodo.getHijoCD());
+						if(nodo.getHijoCI().getElemento()!=null) pila.push(nodo.getHijoCI());
+						System.out.println("Empieza a generar hijos del hijo izq");
+						generarHijos(nodo.getHijoI());
+					} else if(nodo.getHijoCI()!=null){
+						if(nodo.getHijoD().getElemento()!=null) pila.push(nodo.getHijoD());
+						if(nodo.getHijoCD().getElemento()!=null) pila.push(nodo.getHijoCD());
+						generarHijos(nodo.getHijoCI());
+					} else if(nodo.getHijoCD()!=null){
+						if(nodo.getHijoD().getElemento()!=null) pila.push(nodo.getHijoD());
+						generarHijos(nodo.getHijoCD());
+					} else if(nodo.getHijoD()!=null){
+						generarHijos(nodo.getHijoD());
+					} else{
+						if(!pila.isEmpty())generarHijos(pila.pop());
+					}
+					return;
 				} else if(nodo.getElemento()==matrizMeta){
+					System.out.println("Cambia terminado a true");
 					terminado = true;
 				}
+				return;
 			}
 		}
 		public void getMovimientos(int[][] m){
@@ -131,6 +164,7 @@ public class Principal extends JFrame{
 				for(int j=0; j<3; j++){
 					if(m[i][j]==0){
 						temporalMI = m;
+						imprimir(temporalMI);
 						temporalMCI = m;
 						temporalMD = m;
 						if(i==0 && j==0){ // 2 movimientos:
@@ -152,10 +186,11 @@ public class Principal extends JFrame{
 							temporalMD[i][j+1] = 0;
 							temporalMCI = null;
 						} else if(i==2 && j==2){
-							temporalMI[i][j] = temporalMI[i-1][j];
-							temporalMI[i-1][j] = 0;
-							temporalMD[i][j] = temporalMD[i][j-1];
-							temporalMD[i][j-1] = 0;
+							temporalMI[i][j] = temporalMI[i][j-1];
+							temporalMI[i][j-1] = 0;
+							imprimir(temporalMI);
+							temporalMD[i][j] = temporalMD[i-1][j];
+							temporalMD[i-1][j] = 0;
 							temporalMCI = null;
 						} else if(i==0 && j==1){ // 3 movimientos:
 							temporalMI[i][j] = temporalMI[i][j-1];
@@ -192,27 +227,57 @@ public class Principal extends JFrame{
 							temporalMCD[i][j] = temporalMCD[i+1][j]; temporalMCD[i+1][j] = 0;
 							temporalMD[i][j] = temporalMD[i][j+1]; temporalMD[i][j+1] = 0;
 						}
-						if(visitados.contains(temporalMI)) 
+						if(esVisitado(temporalMI) && temporalMI!=null){
+							System.out.println("Agrega temporalMI a visitados");
+							visitados.add(temporalMI);
+						} else{
+							temporalMI = null;
+						}
+						System.out.println("El vector visitados tiene "+visitados.size()+" elementos");
+						if(!visitados.contains(temporalMI) && temporalMI!=null){ 
+							System.out.println("Agrega temporalMI a visitados");
+							visitados.add(temporalMI);
+						}else{
+							System.out.println("Hace temporalMI = null");
 							temporalMI = null; 
-						else
-							visitados.addElement(temporalMI);
-						if(visitados.contains(temporalMCI)) 
+						}
+						/*if(visitados.contains(temporalMCI) || temporalMCI == null){ 
 							temporalMCI = null;
-						else
-							visitados.addElement(temporalMCI);
-						if(visitados.contains(temporalMCD)) 
+						}else{
+							visitados.add(temporalMCI);
+						}
+						if(visitados.contains(temporalMCD) || temporalMCD == null){ 
 							temporalMCD = null;
-						else
-							visitados.addElement(temporalMCD);
-						if(visitados.contains(temporalMD)) 
+						}else{
+							visitados.add(temporalMCD);
+						}
+						if(visitados.contains(temporalMD) || temporalMD == null){ 
 							temporalMD = null;
-						else
-							visitados.addElement(temporalMD);
+						}else{
+							visitados.add(temporalMD);
+						}*/
+						consolaIzq.setText(""+visitados.size());
+						if(temporalMI == null && temporalMCI==null && temporalMCD==null && temporalMD==null) return;
 						arbol.add(new Arbol<int[][]>(temporalMI), new Arbol<int[][]>(temporalMCI), new Arbol<int[][]>(temporalMCD),new Arbol<int[][]>(temporalMD));
+						consolaDer.append("El tamaño del árbol es: "+arbol.size());
 						System.out.println("Hasta aquí añadió el arboliyo");
-						break;
+						return;
 					}
 				}
+			}
+		}
+		private boolean esVisitado(int[][] temporalMI) {
+			for(int i=0; i<visitados.size(); i++){
+				if(visitados.elementAt(i).equals(temporalMI)) return true;
+			}
+			return false;
+		}
+		public void imprimir(int[][] m){
+			for(int i=0; i<3; i++){
+				for(int j=0; j<3; j++){
+					consolaDer.append(""+m[i][j]);
+				}
+				consolaDer.append("\n");
 			}
 		}
 		public void llenarMatrices(int[][] mI, int[][] mM){

@@ -16,20 +16,28 @@ public class Arbol<T>{
 	}
 	public void add(Arbol<T> i, Arbol<T> ci, Arbol<T> cd, Arbol<T> d){
 		if(i!=null){
-			raiz.setHijoI(i.getRaiz());
-			contador = contador+i.size();
+			if(i.getRaiz().getElemento()!=null){
+				raiz.setHijoI(i.getRaiz());
+				contador = contador+i.size();
+			}
 		}
 		if(ci!=null){
-			raiz.setHijoCI(ci.getRaiz());
-			contador = contador+ci.size();
+			if(ci.getRaiz().getElemento()!=null){
+				raiz.setHijoCI(ci.getRaiz());
+				contador = contador+ci.size();
+			}
 		}
 		if(cd!=null){
-			raiz.setHijoCD(cd.getRaiz());
-			contador = contador+cd.size();
+			if(cd.getRaiz().getElemento()!=null){
+				raiz.setHijoCD(cd.getRaiz());
+				contador = contador+cd.size();
+			}
 		}
 		if(d!=null){
-			raiz.setHijoD(d.getRaiz());
-			contador = contador+d.size();
+			if(d.getRaiz().getElemento()!=null){
+				raiz.setHijoD(d.getRaiz());
+				contador = contador+d.size();
+			}
 		}
 	}
 	public NodoArbol<T> getRaiz(){
