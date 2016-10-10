@@ -1,8 +1,7 @@
 package busqueda_profundidad;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.*;
 import javax.swing.*;
 
@@ -95,78 +94,66 @@ public class Principal extends JFrame{
 		int matrizInicial[][];
 		int matrizMeta[][];
 		Vector<int[][]> visitados = new Vector<int[][]>();
-		Stack<NodoArbol> pila = new Stack<NodoArbol>();
+		Stack<int[][]> pila = new Stack<int[][]>();
 		boolean terminado = false;
 		public void actionPerformed(ActionEvent e){
 			String comando = e.getActionCommand();
 			if(comando.equals("Buscar")){
 				bloquearCamposTexto();
+				consolaIzq.setText("");
+				consolaDer.setText("");
 				visitados.clear();
 				pila.clear();
 				matrizInicial = new int[3][3];
 				matrizMeta = new int[3][3];
 				llenarMatrices(matrizInicial,matrizMeta);
-				arbol = new Arbol<int[][]>(matrizInicial);
 				visitados.add(matrizInicial);
-				System.out.println("Empieza a generar hijos");
-				generarHijos(arbol.getRaiz());
-				System.out.println("Termina de generar hijos");
-				if(terminado) 
-					consolaDer.append("\nSI SE ENCONTRÓ");
-				else
+				generarHijos(visitados.lastElement());
+				desbloquearCamposTexto();
+				if(terminado){ 
+					mostrarVisitados();
+					mostrarCerrados();
+				}else{
 					consolaDer.append("\nNO SE ENCONTRÓ");
+				}
 			}
 		}
-		public void generarHijos(NodoArbol<int[][]> nodo){
-			imprimir(nodo.getElemento());
-			if(nodo.getElemento()==null) return;
-			System.out.println("Apunto de entrar al while(true)");
+		public void generarHijos(int[][] nodo){
+			if(visitados.lastElement()==null) return;
 			while(true){
-				System.out.println("Entra al while");
-				if(nodo.getElemento()!=matrizMeta){
+				/*consolaDer.append("Entró al while (nodo a evaluar y matrizMeta)\n");
+				imprimirD(visitados.lastElement());
+				imprimirD(matrizMeta);*/
+				if(!sonIguales(visitados.lastElement(),matrizMeta)){
 					//Añade hijos de "nodo"
-					System.out.println("Empieza a obtener movimientos");
-					getMovimientos(nodo.getElemento());
-					System.out.println("Termina de obtener movimientos");
-					//Añade hermanos de nodo izquierdo a pila para futuro backtracking
-					if(nodo.getHijoI()!=null){
-						if(nodo.getHijoD().getElemento()!=null) pila.push(nodo.getHijoD());
-						if(nodo.getHijoCD().getElemento()!=null) pila.push(nodo.getHijoCD());
-						if(nodo.getHijoCI().getElemento()!=null) pila.push(nodo.getHijoCI());
-						System.out.println("Empieza a generar hijos del hijo izq");
-						generarHijos(nodo.getHijoI());
-					} else if(nodo.getHijoCI()!=null){
-						if(nodo.getHijoD().getElemento()!=null) pila.push(nodo.getHijoD());
-						if(nodo.getHijoCD().getElemento()!=null) pila.push(nodo.getHijoCD());
-						generarHijos(nodo.getHijoCI());
-					} else if(nodo.getHijoCD()!=null){
-						if(nodo.getHijoD().getElemento()!=null) pila.push(nodo.getHijoD());
-						generarHijos(nodo.getHijoCD());
-					} else if(nodo.getHijoD()!=null){
-						generarHijos(nodo.getHijoD());
-					} else{
-						if(!pila.isEmpty())generarHijos(pila.pop());
+					int[][] temp = new int[3][3];
+					temp = copiarMatriz(visitados.lastElement());
+					getMovimientos(visitados.lastElement());
+					if(!sonIguales(temp,visitados.lastElement())){
+						generarHijos(visitados.lastElement());
+					} else if(!pila.isEmpty()){
+						generarHijos(pila.pop()); 
 					}
+					//generarHijos(visitados.lastElement());
 					return;
-				} else if(nodo.getElemento()==matrizMeta){
-					System.out.println("Cambia terminado a true");
+				} else if(sonIguales(visitados.lastElement(), matrizMeta)){
 					terminado = true;
 				}
 				return;
 			}
 		}
 		public void getMovimientos(int[][] m){
-			int[][] temporalMI;
-			int[][] temporalMCI;
-			int[][] temporalMCD = null;
-			int[][] temporalMD;
+			int[][] temporalMI = new int[3][3];
+			temporalMI = copiarMatriz(m);
+			int[][] temporalMCI = new int[3][3];
+			temporalMCI = copiarMatriz(m);
+			int[][] temporalMCD = new int[3][3];
+			temporalMCD = null;
+			int[][] temporalMD = new int[3][3];
+			temporalMD = copiarMatriz(m);
 			for(int i=0; i<3; i++){
 				for(int j=0; j<3; j++){
 					if(m[i][j]==0){
-						temporalMI = m;
-						imprimir(temporalMI);
-						temporalMCI = m;
-						temporalMD = m;
 						if(i==0 && j==0){ // 2 movimientos:
 							temporalMI[i][j] = temporalMI[i+1][j];
 							temporalMI[i+1][j] = 0;
@@ -188,9 +175,8 @@ public class Principal extends JFrame{
 						} else if(i==2 && j==2){
 							temporalMI[i][j] = temporalMI[i][j-1];
 							temporalMI[i][j-1] = 0;
-							imprimir(temporalMI);
-							temporalMD[i][j] = temporalMD[i-1][j];
-							temporalMD[i-1][j] = 0;
+							temporalMD[i][j] = temporalMD[(i-1)][j];
+							temporalMD[(i-1)][j] = 0;
 							temporalMCI = null;
 						} else if(i==0 && j==1){ // 3 movimientos:
 							temporalMI[i][j] = temporalMI[i][j-1];
@@ -223,62 +209,100 @@ public class Principal extends JFrame{
 						} else if(i==1 && j==1){ //4 Movimientos:
 							temporalMI[i][j] = temporalMI[i][j-1]; temporalMI[i][j-1] = 0;
 							temporalMCI[i][j] = temporalMCI[i-1][j]; temporalMCI[i-1][j] = 0;
-							temporalMCD = m;
+							temporalMCD = copiarMatriz(m);
 							temporalMCD[i][j] = temporalMCD[i+1][j]; temporalMCD[i+1][j] = 0;
 							temporalMD[i][j] = temporalMD[i][j+1]; temporalMD[i][j+1] = 0;
 						}
-						if(esVisitado(temporalMI) && temporalMI!=null){
-							System.out.println("Agrega temporalMI a visitados");
+						if(!esVisitado(temporalMI) && temporalMI!=null){
 							visitados.add(temporalMI);
 						} else{
 							temporalMI = null;
 						}
-						System.out.println("El vector visitados tiene "+visitados.size()+" elementos");
-						if(!visitados.contains(temporalMI) && temporalMI!=null){ 
-							System.out.println("Agrega temporalMI a visitados");
-							visitados.add(temporalMI);
-						}else{
-							System.out.println("Hace temporalMI = null");
-							temporalMI = null; 
-						}
-						/*if(visitados.contains(temporalMCI) || temporalMCI == null){ 
-							temporalMCI = null;
-						}else{
+						if(!esVisitado(temporalMCI) && temporalMCI!=null && temporalMI==null){ 
 							visitados.add(temporalMCI);
-						}
-						if(visitados.contains(temporalMCD) || temporalMCD == null){ 
-							temporalMCD = null;
 						}else{
+							if(esVisitado(temporalMCI) || temporalMCI==null) temporalMCI = null; 
+						}
+						if(!esVisitado(temporalMCD)&&temporalMCD!=null&&temporalMI==null&&temporalMCI==null){ 
 							visitados.add(temporalMCD);
-						}
-						if(visitados.contains(temporalMD) || temporalMD == null){ 
-							temporalMD = null;
 						}else{
+							if(esVisitado(temporalMCD) || temporalMCD==null) temporalMCD = null;
+						}
+						if(!esVisitado(temporalMD)&&temporalMD!=null&&temporalMI==null&&temporalMCI==null&&temporalMCD==null){ 
 							visitados.add(temporalMD);
-						}*/
-						consolaIzq.setText(""+visitados.size());
+						}else{
+							if(esVisitado(temporalMD) || temporalMD==null) temporalMD = null;
+						}
 						if(temporalMI == null && temporalMCI==null && temporalMCD==null && temporalMD==null) return;
-						arbol.add(new Arbol<int[][]>(temporalMI), new Arbol<int[][]>(temporalMCI), new Arbol<int[][]>(temporalMCD),new Arbol<int[][]>(temporalMD));
-						consolaDer.append("El tamaño del árbol es: "+arbol.size());
-						System.out.println("Hasta aquí añadió el arboliyo");
+						//arbol.add(new Arbol<int[][]>(temporalMI), new Arbol<int[][]>(temporalMCI), new Arbol<int[][]>(temporalMCD),new Arbol<int[][]>(temporalMD));
+						agregarCerrados(temporalMI,temporalMCI,temporalMCD,temporalMD);
 						return;
 					}
 				}
 			}
 		}
-		private boolean esVisitado(int[][] temporalMI) {
-			for(int i=0; i<visitados.size(); i++){
-				if(visitados.elementAt(i).equals(temporalMI)) return true;
+		public void agregarCerrados(int[][] temporalMI, int[][] temporalMCI, int[][] temporalMCD, int[][] temporalMD){
+			if(temporalMD!=null && !esVisitado(temporalMD)){
+				pila.push(temporalMD);
 			}
-			return false;
+			if(temporalMCD!=null && !esVisitado(temporalMCD)){
+				pila.push(temporalMCD);
+			}
+			if(temporalMCI!=null && !esVisitado(temporalMCI)){
+				pila.push(temporalMCI);
+			}
 		}
-		public void imprimir(int[][] m){
+		private boolean esVisitado(int[][] m) {
+			if(m==null) return false;
+			boolean resultado = true;
+			for(int i=0; i<visitados.size(); i++){
+				if(i>0 && resultado) return true;
+				resultado = sonIguales(visitados.elementAt(i), m);
+			}
+			return resultado;
+		}
+		public boolean sonIguales(int[][] m1, int[][] m2){
+			boolean resultado = true;
 			for(int i=0; i<3; i++){
 				for(int j=0; j<3; j++){
-					consolaDer.append(""+m[i][j]);
+					if(m1[i][j] != m2[i][j]){
+						resultado = false;
+						break;
+					}
+				}
+			}
+			return resultado;
+		}
+		public int[][] copiarMatriz(int[][] m){
+			int[][] matriz = new int[3][3];
+			for(int i=0; i<3; i++){
+				for(int j=0; j<3; j++){
+					matriz[i][j] = m[i][j];
+				}
+			}
+			return matriz;
+		}
+		public void imprimirD(int[][] m){
+			consolaDer.append("|---|---|---|\n");
+			for(int i=0; i<3; i++){
+				for(int j=0; j<3; j++){
+					consolaDer.append("| "+m[i][j]+" ");
+					if(j==2) consolaDer.append("|");
 				}
 				consolaDer.append("\n");
 			}
+			consolaDer.append("|---|---|---|\n\n");
+		}
+		public void imprimirI(int[][] m){
+			consolaIzq.append("|---|---|---|\n");
+			for(int i=0; i<3; i++){
+				for(int j=0; j<3; j++){
+					consolaIzq.append("| "+m[i][j]+" ");
+					if(j==2) consolaIzq.append("|");
+				}
+				consolaIzq.append("\n");
+			}
+			consolaIzq.append("|---|---|---|\n\n");
 		}
 		public void llenarMatrices(int[][] mI, int[][] mM){
 			//Llenar Matriz Inicial
@@ -297,6 +321,25 @@ public class Principal extends JFrame{
 			fin00.setEditable(false);fin01.setEditable(false);fin02.setEditable(false);
 			fin10.setEditable(false);fin11.setEditable(false);fin12.setEditable(false);
 			fin20.setEditable(false);fin21.setEditable(false);fin22.setEditable(false);
+		}
+		public void desbloquearCamposTexto(){
+			ini00.setEditable(true);ini01.setEditable(true);ini02.setEditable(true);
+			ini10.setEditable(true);ini11.setEditable(true);ini12.setEditable(true);
+			ini20.setEditable(true);ini21.setEditable(true);ini22.setEditable(true);
+			fin00.setEditable(true);fin01.setEditable(true);fin02.setEditable(true);
+			fin10.setEditable(true);fin11.setEditable(true);fin12.setEditable(true);
+			fin20.setEditable(true);fin21.setEditable(true);fin22.setEditable(true);
+		}
+		public void mostrarVisitados(){
+			for(int i=0; i<visitados.size(); i++){
+				imprimirI(visitados.elementAt(i));
+			}
+		}
+		public void mostrarCerrados(){
+			consolaDer.append("IMPRIMIENDO CERRADOS\n");
+			while(!pila.isEmpty()){
+				imprimirD(pila.pop());
+			}
 		}
 	}
 }

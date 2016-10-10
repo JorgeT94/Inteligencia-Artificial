@@ -17,6 +17,7 @@ public class Arbol<T>{
 	public void add(Arbol<T> i, Arbol<T> ci, Arbol<T> cd, Arbol<T> d){
 		if(i!=null){
 			if(i.getRaiz().getElemento()!=null){
+				System.out.println("WOOP");
 				raiz.setHijoI(i.getRaiz());
 				contador = contador+i.size();
 			}
