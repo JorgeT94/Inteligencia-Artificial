@@ -13,7 +13,7 @@ public class Principal extends JFrame{
 	private JButton buscar;
 	MiOyente miOyente;
 	Arbol<int[][]> arbol;
-	
+
 	public Principal(String titulo){
 		super(titulo);
 		hazInterfaz();
@@ -70,6 +70,9 @@ public class Principal extends JFrame{
 		buscar.setActionCommand("Buscar");
 		miOyente = new MiOyente();
 		buscar.addActionListener(miOyente);
+		agregarListeners();
+			
+		
 		panelMedio.add(buscar);
 		panelBase.add(panelMedio);
 		
@@ -89,8 +92,29 @@ public class Principal extends JFrame{
 	public static void main(String[] args) {
 		new Principal("Busqueda de Profundidad");
 	}
+	private void agregarListeners() {
+		ini00.addKeyListener(miOyente);
+		ini01.addKeyListener(miOyente);
+		ini02.addKeyListener(miOyente);
+		ini10.addKeyListener(miOyente);
+		ini11.addKeyListener(miOyente);
+		ini12.addKeyListener(miOyente);
+		ini20.addKeyListener(miOyente);
+		ini21.addKeyListener(miOyente);
+		ini22.addKeyListener(miOyente);
+		fin00.addKeyListener(miOyente);
+		fin01.addKeyListener(miOyente);
+		fin02.addKeyListener(miOyente);
+		fin10.addKeyListener(miOyente);
+		fin11.addKeyListener(miOyente);
+		fin12.addKeyListener(miOyente);
+		fin20.addKeyListener(miOyente);
+		fin21.addKeyListener(miOyente);
+		fin22.addKeyListener(miOyente);
+
+	}
 	
-	class MiOyente implements ActionListener{
+	class MiOyente implements ActionListener, KeyListener{		
 		int matrizInicial[][];
 		int matrizMeta[][];
 		Vector<int[][]> visitados = new Vector<int[][]>();
@@ -116,7 +140,7 @@ public class Principal extends JFrame{
 				}else{
 					consolaDer.append("\nNO SE ENCONTRÓ");
 				}
-			}
+			}			
 		}
 		public void generarHijos(int[][] nodo){
 			if(visitados.lastElement()==null) return;
@@ -340,6 +364,30 @@ public class Principal extends JFrame{
 			while(!pila.isEmpty()){
 				imprimirD(pila.pop());
 			}
+		}
+		public void keyPressed(KeyEvent arg0) {
+			
+			
+		}
+		public void keyReleased(KeyEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+		public void keyTyped(KeyEvent ke) {
+			char c=ke.getKeyChar();
+
+            if(ke.getSource() instanceof JTextField ){
+            	if(((JTextField)(ke.getSource())).getText().length()==1)
+            		ke.consume(); 
+            	
+            }
+	          if(!Character.isDigit(c)) { 
+	              getToolkit().beep(); 
+	               
+	              ke.consume(); 
+	               
+	          }	
+	          
 		}
 	}
 }
