@@ -8,8 +8,8 @@ import javax.swing.*;
 public class Principal extends JFrame{
 	private JTextArea consolaIzq;
 	private JTextArea consolaDer;
-	private JTextField ini00,ini01,ini02,ini10,ini11,ini12,ini20,ini21,ini22;
-	private JTextField fin00,fin01,fin02,fin10,fin11,fin12,fin20,fin21,fin22;
+	private JTextField[][] ini =new JTextField[3][3];
+	private JTextField[][] fin =new JTextField[3][3];
 	private JButton buscar;
 	MiOyente miOyente;
 	Arbol<int[][]> arbol;
@@ -38,13 +38,13 @@ public class Principal extends JFrame{
 		//Puzzle Inicial
 		JPanel puzzleInicio = new JPanel();
 		puzzleInicio.setLayout(new GridLayout(3,3,2,2));
-		ini00 = new JTextField(5);ini01 = new JTextField(5);ini02 = new JTextField(5);
-		ini10 = new JTextField(5);ini11 = new JTextField(5);ini12 = new JTextField(5);
-		ini20 = new JTextField(5);ini21 = new JTextField(5);ini22 = new JTextField(5);
+		for (int i = 0; i < ini.length; i++) {
+			for (int j = 0; j < ini[i].length; j++) {
+				ini[i][j]=new JTextField(5);
+				puzzleInicio.add(ini[i][j]);
+			}
+		}
 		//puzzleInicio.setSize(150, 150);
-		puzzleInicio.add(ini00);puzzleInicio.add(ini01);puzzleInicio.add(ini02);
-		puzzleInicio.add(ini10);puzzleInicio.add(ini11);puzzleInicio.add(ini12);
-		puzzleInicio.add(ini20);puzzleInicio.add(ini21);puzzleInicio.add(ini22);
 		panelArriba.add(puzzleInicio, BorderLayout.WEST);
 		//BOTON
 		//JButton buscar2 = new JButton("BUSCAR");
@@ -53,12 +53,12 @@ public class Principal extends JFrame{
 		//Puzzle Meta
 		JPanel puzzleFinal = new JPanel();
 		puzzleFinal.setLayout(new GridLayout(3,3,2,2));
-		fin00 = new JTextField(5);fin01 = new JTextField(5);fin02 = new JTextField(5);
-		fin10 = new JTextField(5);fin11 = new JTextField(5);fin12 = new JTextField(5);
-		fin20 = new JTextField(5);fin21 = new JTextField(5);fin22 = new JTextField(5);
-		puzzleFinal.add(fin00);puzzleFinal.add(fin01);puzzleFinal.add(fin02);
-		puzzleFinal.add(fin10);puzzleFinal.add(fin11);puzzleFinal.add(fin12);
-		puzzleFinal.add(fin20);puzzleFinal.add(fin21);puzzleFinal.add(fin22);
+		for (int i = 0; i < ini.length; i++) {
+			for (int j = 0; j < ini[i].length; j++) {
+				fin[i][j]=new JTextField(5);
+				puzzleFinal.add(fin[i][j]);
+			}
+		}
 		panelArriba.add(puzzleFinal, BorderLayout.EAST);
 		panelBase.add(panelArriba);
 
@@ -93,24 +93,12 @@ public class Principal extends JFrame{
 		new Principal("Busqueda de Profundidad");
 	}
 	private void agregarListeners() {
-		ini00.addKeyListener(miOyente);
-		ini01.addKeyListener(miOyente);
-		ini02.addKeyListener(miOyente);
-		ini10.addKeyListener(miOyente);
-		ini11.addKeyListener(miOyente);
-		ini12.addKeyListener(miOyente);
-		ini20.addKeyListener(miOyente);
-		ini21.addKeyListener(miOyente);
-		ini22.addKeyListener(miOyente);
-		fin00.addKeyListener(miOyente);
-		fin01.addKeyListener(miOyente);
-		fin02.addKeyListener(miOyente);
-		fin10.addKeyListener(miOyente);
-		fin11.addKeyListener(miOyente);
-		fin12.addKeyListener(miOyente);
-		fin20.addKeyListener(miOyente);
-		fin21.addKeyListener(miOyente);
-		fin22.addKeyListener(miOyente);
+		for (int i = 0; i < ini.length; i++) {
+			for (int j = 0; j < ini[i].length; j++) {
+				ini[i][j].addKeyListener(miOyente);
+				fin[i][j].addKeyListener(miOyente);
+			}
+		}
 
 	}
 	
@@ -329,30 +317,32 @@ public class Principal extends JFrame{
 			consolaIzq.append("|---|---|---|\n\n");
 		}
 		public void llenarMatrices(int[][] mI, int[][] mM){
-			//Llenar Matriz Inicial
-			mI[0][0]=Integer.parseInt(ini00.getText());mI[0][1]=Integer.parseInt(ini01.getText());mI[0][2]=Integer.parseInt(ini02.getText());
-			mI[1][0]=Integer.parseInt(ini10.getText());mI[1][1]=Integer.parseInt(ini11.getText());mI[1][2]=Integer.parseInt(ini12.getText());
-			mI[2][0]=Integer.parseInt(ini20.getText());mI[2][1]=Integer.parseInt(ini21.getText());mI[2][2]=Integer.parseInt(ini22.getText());
-			//Llenar Matriz Meta
-			mM[0][0]=Integer.parseInt(fin00.getText());mM[0][1]=Integer.parseInt(fin01.getText());mM[0][2]=Integer.parseInt(fin02.getText());
-			mM[1][0]=Integer.parseInt(fin10.getText());mM[1][1]=Integer.parseInt(fin11.getText());mM[1][2]=Integer.parseInt(fin12.getText());
-			mM[2][0]=Integer.parseInt(fin20.getText());mM[2][1]=Integer.parseInt(fin21.getText());mM[2][2]=Integer.parseInt(fin22.getText());
+			
+			for (int i = 0; i < ini.length; i++) {
+				for (int j = 0; j < ini[i].length; j++) {
+					//Llenar Matriz Inicial
+					mI[i][j]=Integer.parseInt(ini[i][j].getText());
+					//Llenar Matriz Meta
+					mM[i][j]=Integer.parseInt(fin[i][j].getText());
+				}
+			}
 		}
+		
 		public void bloquearCamposTexto(){
-			ini00.setEditable(false);ini01.setEditable(false);ini02.setEditable(false);
-			ini10.setEditable(false);ini11.setEditable(false);ini12.setEditable(false);
-			ini20.setEditable(false);ini21.setEditable(false);ini22.setEditable(false);
-			fin00.setEditable(false);fin01.setEditable(false);fin02.setEditable(false);
-			fin10.setEditable(false);fin11.setEditable(false);fin12.setEditable(false);
-			fin20.setEditable(false);fin21.setEditable(false);fin22.setEditable(false);
+			for (int i = 0; i < ini.length; i++) {
+				for (int j = 0; j < ini[i].length; j++) {
+					ini[i][j].setEditable(false);
+					fin[i][j].setEditable(false);
+				}
+			}
 		}
 		public void desbloquearCamposTexto(){
-			ini00.setEditable(true);ini01.setEditable(true);ini02.setEditable(true);
-			ini10.setEditable(true);ini11.setEditable(true);ini12.setEditable(true);
-			ini20.setEditable(true);ini21.setEditable(true);ini22.setEditable(true);
-			fin00.setEditable(true);fin01.setEditable(true);fin02.setEditable(true);
-			fin10.setEditable(true);fin11.setEditable(true);fin12.setEditable(true);
-			fin20.setEditable(true);fin21.setEditable(true);fin22.setEditable(true);
+			for (int i = 0; i < ini.length; i++) {
+				for (int j = 0; j < ini[i].length; j++) {
+					ini[i][j].setEditable(true);
+					fin[i][j].setEditable(true);
+				}
+			}
 		}
 		public void mostrarVisitados(){
 			for(int i=0; i<visitados.size(); i++){
